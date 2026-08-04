@@ -14,6 +14,9 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useRuntimeConfig } from '#imports'
+
+const config = useRuntimeConfig()
 
 const isReady = ref(false)
 
@@ -22,8 +25,8 @@ const initWidget = () => {
     try {
       new window.CDEKWidget({
         root: 'cdek-map', 
-        apiKey: 'ТВОЙ_КЛЮЧ_ЯНДЕКС_КАРТ', // Вставь сюда ключ 
-        servicePath: 'http://localhost:8000/service.php', 
+        apiKey: config.public.yandexMapsApiKey,
+        servicePath: '/api/cdek', 
         
         defaultLocation: 'Москва',
         debug: true,
