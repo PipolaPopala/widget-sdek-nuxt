@@ -1,75 +1,67 @@
-# Nuxt Minimal Starter
+# Интеграция виджета СДЭК 3.0 в Nuxt 4
+Этот проект — готовый шаблон для подключения новой версии виджета СДЭК (v3) в современное приложение на Nuxt 4.
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Виджет 3-й версии больше не может работать как чисто клиентский скрипт. Ему обязательно нужен бэкенд для авторизации и получения списка пунктов выдачи (ПВЗ). В этом проекте бэкенд уже написан на TypeScript (с использованием движка Nitro)
 
-## Setup
+## 🚀 Быстрый старт (Локальный запуск)
+Чтобы запустить проект у себя на компьютере и увидеть карту, выполните 3 простых шага:
 
-Make sure to install dependencies:
+1. Установите зависимости
+Откройте терминал в папке с проектом и выполните команду:
 
-```bash
-# npm
+```
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
+2. Добавьте ключ Яндекс.Карт (ОБЯЗАТЕЛЬНО)
+Виджету СДЭК для отрисовки карты необходим ваш личный ключ от API Яндекс.Карт. Без него карта не загрузится.
 
-Start the development server on `http://localhost:3000`:
+Получите бесплатный ключ в Кабинете разработчика Яндекса (вам нужен сервис «JavaScript API и HTTP Геокодер»).
 
-```bash
-# npm
+Создайте в корне проекта файл с названием .env.
+
+Вставьте в него следующую строку со своим ключом:
+
+```
+NUXT_PUBLIC_YANDEX_MAPS_API_KEY=ваш_реальный_ключ_от_яндекса_сюда
+```
+
+3. Запустите сервер разработки
 npm run dev
 
-# pnpm
-pnpm dev
+После этого откройте в браузере http://localhost:3000. Вы должны увидеть работающий виджет
 
-# yarn
-yarn dev
+## 📂 Структура проекта (Где что лежит)
+app/components/CdekWidget.vue — Фронтенд. Сам компонент Vue. Здесь настраивается внешний вид карты, параметры отображения (например, скрытие доставки "до двери") и перехватывается событие выбора ПВЗ пользователем (onChoose).
 
-# bun
-bun run dev
+server/api/cdek.ts — Бэкенд (Прокси). Скрипт, который безопасно хранит ключи СДЭК, запрашивает токены и общается с серверами СДЭК от лица вашего сайта.
+
+nuxt.config.ts — Конфиг Nuxt, где настроен проброс ключа Яндекса из .env на фронтенд.
+
+## 🏭 Как перевести виджет в ПРОДАКШЕН (Боевой режим)
+Сейчас проект настроен на тестовую среду СДЭК. Там используются публичные тестовые ключи и тестовый сервер (api.edu.cdek.ru). Чтобы виджет начал работать с вашим реальным договором (для расчета реальных тарифов и оформления накладных), сделайте следующее:
+
+Шаг 1. Получите боевые ключи СДЭК
+Вам понадобятся Account (Логин) и Secure password (Пароль). Их можно найти в Личном кабинете СДЭК в разделе интеграции или запросить у вашего менеджера.
+
+Шаг 2. Отредактируйте бэкенд
+Откройте файл server/api/cdek.ts и измените 3 верхние константы:
+
+БЫЛО (Тестовый режим):
+
+```
+const CDEK_API_URL = 'https://api.edu.cdek.ru/v2'
+const CLIENT_ID = 'wqGwiQx0gg8mLtiEKsUinjVSICCjtTEP'
+const CLIENT_SECRET = 'RmAmgvSgSl1yirlz9QupbzOJVqhCxcP5'
 ```
 
-## Production
+СТАЛО (Боевой режим):
 
-Build the application for production:
+// 1. Убираем ".edu" из адреса сервера
+const CDEK_API_URL = 'https://api.cdek.ru/v2'
 
-```bash
-# npm
-npm run build
+// 2. Вставляем ваши реальные ключи (в идеале их тоже лучше вынести в .env)
+const CLIENT_ID = 'ваш_боевой_account'
+const CLIENT_SECRET = 'ваш_боевой_secure_password'
 
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+После этих изменений виджет начнет обращаться к реальным серверам СДЭК и отдавать актуальные данные и тарифы по вашему договору.
